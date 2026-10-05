@@ -31,7 +31,7 @@ jobs:
           mkdir -p /tmp/ipa/Payload
           rm -rf /tmp/ipa/Payload/OfflineSnake.app
           cp -R "$APP_PATH" /tmp/ipa/Payload/
-          /usr/bin/zip -rq /tmp/OfflineSnake_unsigned.ipa Payload
+          ( cd /tmp/ipa && /usr/bin/zip -rq /tmp/OfflineSnake_unsigned.ipa Payload )
           ls -la /tmp/OfflineSnake_unsigned.ipa
 
       - name: Upload IPA artifact
