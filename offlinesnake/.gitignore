@@ -1,0 +1,10 @@
+# Xcode user data and build products
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.app/

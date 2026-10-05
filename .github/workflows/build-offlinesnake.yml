@@ -1,0 +1,41 @@
+name: build-offlinesnake
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build for device (unsigned)
+        run: |
+          set -euo pipefail
+          cd offlinesnake
+          xcodebuild \
+            -project OfflineSnake.xcodeproj \
+            -scheme OfflineSnake \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build > /tmp/xcodebuild.log 2>&1 || { tail -60 /tmp/xcodebuild.log; exit 1; }
+          tail -5 /tmp/xcodebuild.log
+          APP_PATH="$(find ~/Library/Developer/Xcode/DerivedData -type d -name 'OfflineSnake.app' -path '*Release-iphoneos*' | head -1)"
+          echo "app path: ${APP_PATH:?app not found}"
+          mkdir -p /tmp/ipa/Payload
+          rm -rf /tmp/ipa/Payload/OfflineSnake.app
+          cp -R "$APP_PATH" /tmp/ipa/Payload/
+          /usr/bin/zip -rq /tmp/OfflineSnake_unsigned.ipa Payload
+          ls -la /tmp/OfflineSnake_unsigned.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OfflineSnake-unsigned-ipa
+          path: /tmp/OfflineSnake_unsigned.ipa
